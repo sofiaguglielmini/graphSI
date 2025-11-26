@@ -1,6 +1,6 @@
 Package: graphSI
 Type: Package
-Title: Inference after selection in undirected graphical models
+Title: Inference after regularization-based selection in undirected graphical (Gaussian and elliptical) models
 Version: 0.1.0
 Authors@R: c(
     person(
@@ -16,4 +16,9 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
 Imports: 
-    fastmatrix
+    fastmatrix,
+    GGMncv,
+    GLassoElnetFast,
+    glassoFast,
+    rockchalk,
+    selectiveInference
