@@ -36,7 +36,7 @@ graphSelect(
 \item{seed}{Random seed for data splitting (default: NULL)}
 }
 \value{
-A list containing the adjacency matrix of the selected graph, selected indices, and data splitting information
+An S3 object of class 'graphSelect' with user-facing elements: adjacency matrix, selected indices, data splitting info. Internal elements also stored but hidden from print().
 }
 \description{
 Select an undirected graphical model using regularized estimation methods.

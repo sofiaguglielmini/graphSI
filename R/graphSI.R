@@ -11,7 +11,7 @@
 #' @param penalty Penalty to use for graph selection (default: "lasso")
 #' @param penalize.diagonal Logical indicating whether to penalize diagonal elements (default: FALSE)
 #' @param seed Random seed for data splitting (default: NULL)
-#' @return A list containing the adjacency matrix of the selected graph, selected indices, and data splitting information
+#' @return An S3 object of class 'graphSelect' with user-facing elements: adjacency matrix, selected indices, data splitting info. Internal elements also stored but hidden from print().
 #' @export
 graphSelect <- function(data, lambda = NULL, gamma = NULL,
                         data.splitting = FALSE,
@@ -20,15 +20,13 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
                         penalty = c("lasso", "elastic net", "SCAD", "MCP"),
                         penalize.diagonal = FALSE,
                         seed = NULL){
+
   penalty <- match.arg(penalty)
   loss <- match.arg(loss)
+
   if(data.splitting){
-    if(!is.null(seed)){
-      set.seed(seed)
-    }
-    if(is.null(split.proportion)){
-      split.proportion <- 0.5
-    }
+    if(!is.null(seed)) set.seed(seed)
+    if(is.null(split.proportion)) split.proportion <- 0.5
     n <- nrow(data)
     n1 <- floor(n * split.proportion)
     X <- data[1:n1, ]
@@ -36,58 +34,83 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
     X <- data
     n1 <- NULL
   }
+
   n <- nrow(X)
   p <- ncol(X)
   X <- scale(X)
   Sn <- cov(X)
-  if(is.null(lambda)){
-    lambda <- sqrt(log(p)/n)
-  }
+
+  if(is.null(lambda)) lambda <- sqrt(log(p)/n)
   if(is.null(gamma)){
-    if(penalty=="elastic net") { gamma <- 0.5
-    } else if(penalty=="SCAD") { gamma <- 3.7
-    } else if(penalty=="MCP") { gamma <- 2.0}
+    gamma <- switch(penalty,
+                    "elastic net" = 0.5,
+                    "SCAD" = 3.7,
+                    "MCP" = 2.0,
+                    NA)
   }
-  if(loss=="gaussian"){
-    if(penalty=="elastic net"){
+
+  if(loss == "Gaussian"){
+    if(penalty == "elastic net"){
       selection_step <- GLassoElnetFast::gelnet(Sn, lambda, gamma, penalize.diagonal=penalize.diagonal)
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$Sigma
-    } else if(penalty=="lasso"){
+    } else if(penalty == "lasso"){
       Lambda <- matrix(lambda, nrow=p, ncol=p)
-      if(!penalize.diagonal){ diag(Lambda) <- 0 }
+      if(!penalize.diagonal) diag(Lambda) <- 0
       selection_step <- glassoFast::glassoFast(Sn, Lambda)
       Theta_hat <- selection_step$wi
       Sigma_hat <- selection_step$w
     } else{
-      selection_step <- GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma, penalize_diagonal=penalize.diagonal, initial = GGMncv::ledoit_wolf, Y=X)
+      selection_step <- GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
+                                       penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X)
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$Sigma
     }
-  } else{
-    stop("Loss function not recognized.")
-  }
+  } else stop("Loss function not recognized.")
+
   theta_hat <- fastmatrix::vech(Theta_hat)
+  E <- which(fastmatrix::vech(1 * (Theta_hat != 0)) != 0)
+  nE <- which(fastmatrix::vech(1 * (Theta_hat != 0)) == 0)
 
-  # Selected edges in vech form
-  E <- which(fastmatrix::vech(Theta_hat!=0))
-  nE <- which(fastmatrix::vech(Theta_hat==0))
+  # create S3 object with both user-facing and internal elements
+  out <- structure(
+    list(
 
-  # For user, just return the adjacency matrix of the selected graph
-  invisible(list(theta_hat = theta_hat,
-            Sigma_hat = Sigma_hat,
-            selected_graph = Theta_hat!=0,
-            penalty = penalty, loss = loss,
-            lambda = lambda,
-            gamma = gamma,
-            E = E, nE = nE,
-            penalize.diagonal = penalize.diagonal,
-            n1 = n1))
+      # user-facing elements
+      adjacency.matrix = Theta_hat != 0,
+      selected.indices = which(Theta_hat != 0, arr.ind = TRUE),
+      data.splitting = data.splitting,
+      split.proportion = split.proportion,
 
-  return(list(adjacency.matrix = Theta_hat!=0,
-              selected.indices = which(Theta_hat!=0, arr.ind=T),
-              data.splitting = data.splitting,
-              split.proportion = split.proportion))
+      # internal elements
+      Theta_hat = Theta_hat,
+      Sigma_hat = Sigma_hat,
+      theta_hat = theta_hat,
+      E = E,
+      nE = nE,
+      penalty = penalty,
+      loss = loss,
+      lambda = lambda,
+      gamma = gamma,
+      penalize.diagonal = penalize.diagonal,
+      n1 = n1
+    ),
+    class = "graphSelect"
+  )
+  return(out)
+}
+
+# custom print method for graphSelect objects
+# only shows user-facing elements
+#' @export
+print.graphSelect <- function(x, ...) {
+  cat("Selected Graph:\n")
+  print(x$adjacency.matrix)
+  cat("\nSelected indices:\n")
+  print(x$selected.indices)
+  if(x$data.splitting) {
+    cat("\nData splitting used, proportion:", x$split.proportion, "\n")
+  }
 }
 
 #' @title Inference for edges in the selected graph
@@ -104,7 +127,6 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
 graphInference <- function(data, selected, j, nullvalue,
                     sandwich.variance = FALSE,
                     alpha = 0.05, seed = NULL){
-  method <- match.arg(method)
   if(selected$data.splitting){
     X <- data[(selected$n1+1):nrow(data), ]
     method <- "Data splitting"

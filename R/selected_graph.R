@@ -9,14 +9,13 @@ graph_estimate <- function(X, selected, sandwich.variance){
   p <- ncol(X)
   Sn <- cov(X)
 
-  selected_graph <- selected$selected_graph
   E <- selected$E
   loss <- selected$loss
 
   if(loss == "Gaussian"){
 
     # Fit within the selected graph
-    refitting_step <- GGMncv::constrained(Sn, selected_graph)
+    refitting_step <- GGMncv::constrained(Sn, selected$adjacency.matrix)
     Theta_bar <- refitting_step$Theta
     Sigma_bar <- refitting_step$Sigma
     theta_bar <- fastmatrix::vech(Theta_bar)
