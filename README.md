@@ -2,7 +2,7 @@
 GraphSI provides tools for selection and post-selection inference in undirected graphical models. 
 
 ## Features
-- **Graph selection**: Estimate the structure of an undirected graphical model from a data matrix using Lasso or Elastic Net
+- **Graph selection**: Estimate the structure of an undirected graphical model from a data matrix using the Lasso, Elastic Net, SCAD or MCP penalties
 - **Data-splitting inference**: Split the data to separate selection and inference, overcoming selection bias.
 - **Polyhedral selective inference**: Compute asymptotic post-selection inference for the selected edges, using the entire data for selection and inference and conditioning on selection
 
@@ -40,4 +40,7 @@ inference
 
 ### Graphical elastic net selection
 - Kovács, Solt, et al. "Graphical elastic net and target matrices: Fast algorithms and software for sparse precision matrix estimation." arXiv preprint arXiv:2101.02148 (2021).
+
+### SCAD and MCP selection
+- Williams, Donald R. "Beyond lasso: A survey of nonconvex regularization in Gaussian graphical models." (2020).
 
