@@ -11,7 +11,7 @@ graphSelect(
   data.splitting = FALSE,
   split.proportion = NULL,
   loss = c("Gaussian"),
-  penalty = c("lasso", "elastic net", "SCAD", "MCP"),
+  penalty = c("lasso", "elastic net", "scad", "mcp"),
   penalize.diagonal = FALSE,
   seed = NULL
 )

@@ -17,7 +17,7 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
                         data.splitting = FALSE,
                         split.proportion = NULL,
                         loss = c("Gaussian"),
-                        penalty = c("lasso", "elastic net", "SCAD", "MCP"),
+                        penalty = c("lasso", "elastic net", "scad", "mcp"),
                         penalize.diagonal = FALSE,
                         seed = NULL){
 
@@ -44,25 +44,25 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
   if(is.null(gamma)){
     gamma <- switch(penalty,
                     "elastic net" = 0.5,
-                    "SCAD" = 3.7,
-                    "MCP" = 2.0,
+                    "scad" = 3.7,
+                    "mcp" = 2.0,
                     NA)
   }
 
   if(loss == "Gaussian"){
-    if(penalty == "elastic net"){
-      selection_step <- GLassoElnetFast::gelnet(Sn, lambda, gamma, penalize.diagonal=penalize.diagonal)
-      Theta_hat <- selection_step$Theta
-      Sigma_hat <- selection_step$Sigma
-    } else if(penalty == "lasso"){
+    if(penalty == "lasso"){
       Lambda <- matrix(lambda, nrow=p, ncol=p)
       if(!penalize.diagonal) diag(Lambda) <- 0
       selection_step <- glassoFast::glassoFast(Sn, Lambda)
       Theta_hat <- selection_step$wi
       Sigma_hat <- selection_step$w
+    } else if(penalty == "elastic net"){
+      selection_step <- GLassoElnetFast::gelnet(Sn, lambda, gamma, penalize.diagonal=penalize.diagonal)
+      Theta_hat <- selection_step$Theta
+      Sigma_hat <- selection_step$W
     } else{
-      selection_step <- GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
-                                       penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X)
+      selection_step <- suppressMessages(GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
+                                       penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X))
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$Sigma
     }
@@ -78,7 +78,7 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
 
       # user-facing elements
       adjacency.matrix = Theta_hat != 0,
-      selected.indices = which(Theta_hat != 0, arr.ind = TRUE),
+      selected.indices = which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE),
       data.splitting = data.splitting,
       split.proportion = split.proportion,
 

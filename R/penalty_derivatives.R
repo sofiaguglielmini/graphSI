@@ -1,5 +1,5 @@
 lasso_derivative <- function(x, lambda){
-  lambda*sign(x)
+  lambda
 }
 
 elnet_derivative <- function(x, lambda, gamma){

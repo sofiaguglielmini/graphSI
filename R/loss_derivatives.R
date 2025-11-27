@@ -1,7 +1,7 @@
 loss_gradient <- function(Sigma, X){
   p <- nrow(Sigma)
   Sn <- cov(X)
-  -fastmatrix::dupl.prod(p, x=fastmatrix::vec(-Sigma + Sn)/2, side="left", transposed=T)
+  fastmatrix::dupl.prod(p, x=fastmatrix::vec(Sn - Sigma)/2, side="left", transposed=T)
 }
 
 loss_gradient_variance <- function(Sigma, X){
@@ -10,7 +10,7 @@ loss_gradient_variance <- function(Sigma, X){
   out <- 0
   for(h in 1:n){
     XXT <- crossprod(t(X[h,]))
-    G <- fastmatrix::dupl.prod(p, x=fastmatrix::vec(-Sigma + XXT)/2, side="left", transposed=T)
+    G <- fastmatrix::dupl.prod(p, x=fastmatrix::vec(Sigma - XXT)/2, side="left", transposed=T)
     out <- out + tcrossprod(G)/n
   }
   out
