@@ -21,9 +21,9 @@ penalty_derivative <- function(x, penalty, lambda, gamma = NULL){
     return(lasso_derivative(x, lambda))
   } else if(penalty == "elastic net"){
     return(elnet_derivative(x, lambda, gamma))
-  } else if(penalty == "SCAD"){
+  } else if(penalty == "scad"){
     return(scad_derivative(x, lambda, gamma))
-  } else if(penalty == "MCP"){
+  } else if(penalty == "mcp"){
     return(mcp_derivative(x, lambda, gamma))
   } else{
     stop("Penalty not recognized.")
