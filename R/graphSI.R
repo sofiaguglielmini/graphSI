@@ -60,12 +60,11 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
       selection_step <- GLassoElnetFast::gelnet(Sn, lambda, gamma, penalize.diagonal=penalize.diagonal)
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$W
-    } else{
-      stop("Penalty not yet implemented.")
-      # selection_step <- suppressMessages(GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
-      #                                  penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X))
-      # Theta_hat <- selection_step$Theta
-      # Sigma_hat <- selection_step$Sigma
+    } else if(penalty %in% c("scad", "mcp")){
+      selection_step <- suppressMessages(GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
+                                       penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X))
+      Theta_hat <- selection_step$Theta
+      Sigma_hat <- selection_step$Sigma
     }
   } else stop("Loss function not recognized.")
 

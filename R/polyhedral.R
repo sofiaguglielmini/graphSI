@@ -19,7 +19,7 @@ graphInference_polyhedral <- function(X, j, nullvalue, selected,
                                                selected = selected,
                                                estimated = estimated)
 
-  inference <- inference_truncatedGaussian(conditional$theta_onestep[E], j, conditional$Sigma_E/nrow(X),
+  inference <- inference_truncatedGaussian(conditional$theta_onestepE, j, conditional$Sigma_E/nrow(X),
                                            nullvalue, conditional$A, conditional$b, alpha)
   inference
 }
@@ -53,30 +53,29 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
   sn <- fastmatrix::vech(Sn)
   H_hat_EE_inv <- solve(loss_hessian(Sigma_hat)[E,E])
   G_hat <- loss_gradient(Sigma_hat, X)
-  subgradE <- sign(theta_hat[E])
-  subgradE[diagsE] <- 0
 
   # Compute subgradient
   subgrad <- rep(NA, length(theta_hat))
-  # subgrad[E] <- sign(theta_hat[E])
+  subgrad[E] <- sign(theta_hat[E])
   if(loss == "Gaussian"){
-    for(edge in 1:length(theta_hat)){
+    for(edge in nE){
       subgrad[edge] <- (sigma_hat[edge] - sn[edge])/penalty_derivative(theta_hat[edge], penalty=penalty, lambda, gamma)
     }
   }
   if(!penalize.diagonal | penalty=="scad" | penalty=="mcp"){
     subgrad[E][diagsE] <- 0
   }
-  # print(cbind(subgrad[E], sign(theta_hat[E])))
-  # print(subgrad[nE])
+  subgradE <- subgrad[E]
 
   # One-step estimator
   theta_onestep <- rep(0, length(theta_hat))
-  theta_onestep[E] <- theta_hat[E] - H_hat_EE_inv %*% G_hat[E]
+  # theta_onestep[E] <- theta_hat[E] - H_hat_EE_inv %*% G_hat[E]
+  theta_onestep[E] <- theta_hat[E] - H_hat_EE_inv%*%(-diag(subgrad[E], nrow=length(E))%*%penalty_derivative(theta_hat[E], penalty=penalty, lambda, gamma))
   Theta_onestep <- gogarch::unvech(theta_onestep)
   Sigma_onestep <- solve(Theta_onestep)
-  Hn <- loss_hessian(Sigma_onestep)
-  Jn <- if(sandwich.variance) loss_gradient_variance(Sigma_onestep, X) else Hn
+  # Hn <- loss_hessian(Sigma_onestep)
+  # Jn <- if(sandwich.variance) loss_gradient_variance(Sigma_onestep, X) else Hn
+  Hn <- Jn <- loss_hessian(Sigma_hat)
   Hn_EE_inv <- solve(Hn[E,E, drop=F])
   Jn_EE_inv <- solve(Jn[E,E, drop=F])
 
@@ -87,14 +86,18 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
   theta_perp <- rep(0, length(theta_hat))
   # theta_perp[nE] <- Gn[nE] + A_perp %*% theta_onestep[E]
 
+  # cbind(-diag(sign(theta_hat[E]))%*%theta_hat[0], 0)
+  # cbind(-diag(sign(theta_hat[E]))%*%(theta_onestep[E]+H_hat_EE_inv%*%(-diag(subgrad[E], nrow=length(E))%*%rho.prime[E])), 0)
+  # cbind(-diag(sign(theta_hat[E]))%*%(theta_onestep[E]), diag(sign(theta_hat[E]))%*%H_hat_EE_inv%*%(-diag(subgrad[E], nrow=length(E))%*%rho.prime[E]))
+
   V_hat_E <- abs(theta_hat[E])
 
   # Affine constraints
   if(penalty == "lasso"){
-    theta_perp[nE] <- - G_hat[nE] - lambda*Hn[nE,E, drop=F]%*%H_hat_EE_inv%*%subgradE + A_perp %*% theta_onestep[E]
+    theta_perp[nE] <- lambda*subgrad[nE] - lambda*Hn[nE,E, drop=F]%*%H_hat_EE_inv%*%subgradE + A_perp %*% theta_onestep[E]
 
-    A1 <- - diag(subgradE, nrow = length(E))
-    b1 <- - lambda * diag(subgradE, nrow = length(E)) %*% H_hat_EE_inv %*% subgradE
+    A1 <- - diag(sign(theta_hat[E]), nrow = length(E))
+    b1 <- - lambda * diag(sign(theta_hat[E]), nrow = length(E)) %*% H_hat_EE_inv %*% subgradE
 
     b_term <- lambda * Hn[nE,E, drop=F] %*% H_hat_EE_inv %*% subgradE
     A00 <- - A_perp
@@ -107,8 +110,8 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
 
     K_inv <- solve(diag(length(E)) + lambda * (1-gamma) * H_hat_EE_inv)
 
-    A1 <- - diag(subgradE, nrow = length(E)) %*% K_inv
-    b1 <- - lambda * gamma * diag(subgradE, nrow = length(E)) %*% K_inv %*% H_hat_EE_inv %*% subgradE
+    A1 <- - diag(sign(theta_hat[E]), nrow = length(E)) %*% K_inv
+    b1 <- - lambda * gamma * diag(sign(theta_hat[E]), nrow = length(E)) %*% K_inv %*% H_hat_EE_inv %*% subgradE
 
     A_term1 <- Hn[nE,E, drop=F] %*% K_inv
     A_term2 <- Jn[nE,E, drop=F] %*% Jn_EE_inv %*% Hn[E,E, drop=F]
@@ -130,8 +133,8 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
 
     K_inv <- round(solve(diag(length(E)) - 1/(gamma-1) * H_hat_EE_inv %*% I1), 5)
 
-    A1 <- - diag(subgradE, nrow = length(E)) %*% K_inv
-    b1 <- - lambda * diag(subgradE, nrow = length(E)) %*% K_inv %*% H_hat_EE_inv %*% (I2 + gamma/(gamma-1) * I1) %*% subgradE
+    A1 <- - diag(sign(theta_hat[E]), nrow = length(E)) %*% K_inv
+    b1 <- - lambda * diag(sign(theta_hat[E]), nrow = length(E)) %*% K_inv %*% H_hat_EE_inv %*% (I2 + gamma/(gamma-1) * I1) %*% subgradE
 
     b_term <- lambda * Hn[nE,E, drop=F] %*% K_inv %*% H_hat_EE_inv %*% (I2 + gamma/(gamma-1) * I1) %*% subgradE
     A00 <- - Hn[nE,E, drop=F] %*% K_inv + Jn[nE,E, drop=F] %*% Jn_EE_inv %*% Hn[E,E, drop=F]
@@ -169,22 +172,22 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
            + lambda * gamma / (gamma - 1)^2 * H_hat_EE_inv[E2,E1, drop=F] %*% M1_inv %*% H_hat_EE_inv[E1,E1, drop=F] %*% subgradE[E1]
            + lambda / (gamma - 1) * H_hat_EE_inv[E2,E1, drop=F] %*% M1_inv %*% H_hat_EE_inv[E1,E2, drop=F] %*% subgradE[E2])
 
-    A00_0 <- - diag(subgradE[E0], nrow = length(E0)) %*% K0
-    b00_0 <- - gamma * lambda - diag(subgradE[E0], nrow = length(E0)) %*% k0
+    A00_0 <- - diag(sign(theta_hat[E])[E0], nrow = length(E0)) %*% K0
+    b00_0 <- - gamma * lambda - diag(sign(theta_hat[E])[E0], nrow = length(E0)) %*% k0
 
-    A00_10 <- diag(subgradE[E1], nrow = length(E1)) %*% K1
-    b00_10 <- gamma * lambda + diag(subgradE[E1], nrow = length(E1)) %*% k1
+    A00_10 <- diag(sign(theta_hat[E])[E1], nrow = length(E1)) %*% K1
+    b00_10 <- gamma * lambda + diag(sign(theta_hat[E])[E1], nrow = length(E1)) %*% k1
 
-    A00_11 <- - diag(subgradE[E1], nrow = length(E1)) %*% K1
-    b00_11 <- - lambda - diag(subgradE[E1], nrow = length(E1)) %*% k1
+    A00_11 <- - diag(sign(theta_hat[E])[E1], nrow = length(E1)) %*% K1
+    b00_11 <- - lambda - diag(sign(theta_hat[E])[E1], nrow = length(E1)) %*% k1
     if(length(E1)==0){
       A00_11 <- NULL
       b00_11 <- NULL
       A00_10 <- NULL
       b00_10 <- NULL
     }
-    A00_2 <- diag(subgradE[E2], nrow = length(E2)) %*% K2
-    b00_2 <- lambda + diag(subgradE[E2], nrow = length(E2)) %*% k2
+    A00_2 <- diag(sign(theta_hat[E])[E2], nrow = length(E2)) %*% K2
+    b00_2 <- lambda + diag(sign(theta_hat[E])[E2], nrow = length(E2)) %*% k2
 
     og_order <- order(c(E0, E1, E2))
 
@@ -203,7 +206,7 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
 
     K_inv <- solve(diag(length(E)) - (1 / gamma) * H_hat_EE_inv %*% I1)
 
-    A1 <- - diag(subgradE, nrow = length(E)) %*% K_inv
+    A1 <- - diag(sign(theta_hat[E]), nrow = length(E)) %*% K_inv
     b1 <- -lambda * diag(subgradE, nrow = length(E)) %*% K_inv %*% H_hat_EE_inv %*% I1 %*% subgradE
 
     A_term1 <- Hn[nE,E, drop=F] %*% K_inv
@@ -229,11 +232,11 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
     k0 <- (lambda * H_hat_EE_inv[E0,E1, drop=F] %*% subgradE[E1]
            + (lambda/gamma) * H_hat_EE_inv[E0,E1, drop=F] %*% M1_inv %*% H_hat_EE_inv[E1,E1, drop=F] %*% subgradE[E1])
 
-    A00_0 <- - diag(subgradE[E0], nrow=length(E0)) %*% K0
-    b00_0 <- - gamma * lambda - diag(subgradE[E0], nrow=length(E0)) %*% k0
+    A00_0 <- - diag(sign(theta_hat[E])[E0], nrow=length(E0)) %*% K0
+    b00_0 <- - gamma * lambda - diag(sign(theta_hat[E])[E0], nrow=length(E0)) %*% k0
 
-    A00_1 <- diag(subgradE[E1], nrow=length(E1)) %*% K1
-    b00_1 <- gamma * lambda + diag(subgradE[E1], nrow=length(E1)) %*% k1
+    A00_1 <- diag(sign(theta_hat[E])[E1], nrow=length(E1)) %*% K1
+    b00_1 <- gamma * lambda + diag(sign(theta_hat[E])[E1], nrow=length(E1)) %*% k1
 
     og_order <- order(c(E0, E1))
 
@@ -245,8 +248,9 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
   }
   A <- rbind(A1, A00, A01)
   b <- c(b1, b00, b01)
-  # print(cbind(A %*% theta_onestep[E], b, A %*% theta_onestep[E] - b))
-  if(!all(A %*% theta_onestep[E] <= b)) print("Affine constraint not satisfied.")
 
-  list(A = A, b = b, theta_onestep = theta_onestep, Sigma_E = Sigma_E)
+  print(cbind(A %*% theta_onestep[E], b, A %*% theta_onestep[E] - b))
+  # if(!all(A %*% theta_onestep[E] <= b)) print("Affine constraint not satisfied.")
+
+  list(A = A, b = b, theta_onestepE = theta_onestep[E], Sigma_E = Sigma_E)
 }
