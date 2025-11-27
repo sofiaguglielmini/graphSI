@@ -34,9 +34,6 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
   n <- nrow(X)
   p <- ncol(X)
 
-  Hn <- estimated$Hn
-  Jn <- estimated$Jn
-  Gn <- estimated$Gn
   Sigma_E <- estimated$Sigma_E
   Sn <- estimated$Sn
   sandwich.variance <- estimated$sandwich.variance
@@ -55,7 +52,6 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
   sigma_hat <- fastmatrix::vech(Sigma_hat)
   sn <- fastmatrix::vech(Sn)
   H_hat_EE_inv <- solve(loss_hessian(Sigma_hat)[E,E])
-  Jn_EE_inv <- solve(Jn[E,E, drop=F])
   G_hat <- loss_gradient(Sigma_hat, X)
   subgradE <- sign(theta_hat[E])
   subgradE[diagsE] <- 0
@@ -68,15 +64,21 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
       subgrad[edge] <- (sigma_hat[edge] - sn[edge])/penalty_derivative(theta_hat[edge], penalty=penalty, lambda, gamma)
     }
   }
-  if(!penalize.diagonal){
+  if(!penalize.diagonal | penalty=="scad" | penalty=="mcp"){
     subgrad[E][diagsE] <- 0
   }
-  print(cbind(subgrad[E], sign(theta_hat[E])))
-  print(subgrad[nE])
+  # print(cbind(subgrad[E], sign(theta_hat[E])))
+  # print(subgrad[nE])
 
   # One-step estimator
   theta_onestep <- rep(0, length(theta_hat))
   theta_onestep[E] <- theta_hat[E] - H_hat_EE_inv %*% G_hat[E]
+  Theta_onestep <- gogarch::unvech(theta_onestep)
+  Sigma_onestep <- solve(Theta_onestep)
+  Hn <- loss_hessian(Sigma_onestep)
+  Jn <- if(sandwich.variance) loss_gradient_variance(Sigma_onestep, X) else Hn
+  Hn_EE_inv <- solve(Hn[E,E, drop=F])
+  Jn_EE_inv <- solve(Jn[E,E, drop=F])
 
   # print(cbind(G_hat[E], -lambda * subgradE, selected$selected.indices))
 

@@ -20,4 +20,5 @@ Imports:
     GGMncv,
     GLassoElnetFast,
     glassoFast,
+    gogarch,
     selectiveInference
