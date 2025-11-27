@@ -61,10 +61,11 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$W
     } else{
-      selection_step <- suppressMessages(GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
-                                       penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X))
-      Theta_hat <- selection_step$Theta
-      Sigma_hat <- selection_step$Sigma
+      stop("Penalty not yet implemented.")
+      # selection_step <- suppressMessages(GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
+      #                                  penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X))
+      # Theta_hat <- selection_step$Theta
+      # Sigma_hat <- selection_step$Sigma
     }
   } else stop("Loss function not recognized.")
 
