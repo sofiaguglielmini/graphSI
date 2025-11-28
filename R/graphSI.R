@@ -3,13 +3,12 @@
 #' @title Regularized undirected graph selection
 #' @description Select an undirected graphical model using regularized estimation methods.
 #' @param data Data matrix (n x p)
-#' @param lambda Tuning parameter for the penalty (default: sqrt(log(p)/n))
+#' @param lambda Tuning parameter for the penalty (default: sqrt(2*log(p)/n)). For valid selective inference, lambda should be chosen independently of the data used for selection.
 #' @param gamma Additional tuning parameter for certain penalties (default: 0.5 for elastic net, 3.7 for SCAD, 2.0 for MCP)
 #' @param data.splitting Logical indicating whether to use data splitting for inference (default: FALSE)
 #' @param split.proportion Proportion of data to use for selection if data.splitting is TRUE (default: 0.5)
 #' @param loss Loss function to use (default: "Gaussian")
-#' @param penalty Penalty to use for graph selection (default: "lasso")
-#' @param penalize.diagonal Logical indicating whether to penalize diagonal elements (default: FALSE)
+#' @param penalty Penalty to use for graph selection (default: "lasso"). Options: "lasso", "elastic net", "scad", "mcp". The diagonal elements of the precision matrix are not penalized.
 #' @param seed Random seed for data splitting (default: NULL)
 #' @return An S3 object of class 'graphSelect' with user-facing elements: adjacency matrix, selected indices, data splitting info. Internal elements also stored but hidden from print().
 #' @export
@@ -18,8 +17,9 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
                         split.proportion = NULL,
                         loss = c("Gaussian"),
                         penalty = c("lasso", "elastic net", "scad", "mcp"),
-                        penalize.diagonal = FALSE,
                         seed = NULL){
+
+  penalize.diagonal = FALSE  # do not penalize diagonal elements by default
 
   penalty <- match.arg(penalty)
   loss <- match.arg(loss)
@@ -40,7 +40,7 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
   X <- scale(X)
   Sn <- cov(X)
 
-  if(is.null(lambda)) lambda <- sqrt(log(p)/n)
+  if(is.null(lambda)) lambda <- sqrt(2*log(p)/n)
   if(is.null(gamma)){
     gamma <- switch(penalty,
                     "elastic net" = 0.5,
@@ -62,7 +62,7 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
       Sigma_hat <- selection_step$W
     } else if(penalty %in% c("scad", "mcp")){
       selection_step <- suppressMessages(GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
-                                       penalize_diagonal=penalize.diagonal, initial=GGMncv::ledoit_wolf, Y=X))
+                                       penalize_diagonal=penalize.diagonal, LLA = TRUE, maxit=1e05, thr=1e-06))
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$Sigma
     }
@@ -72,13 +72,19 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
   E <- which(fastmatrix::vech(1 * (Theta_hat != 0)) != 0)
   nE <- which(fastmatrix::vech(1 * (Theta_hat != 0)) == 0)
 
+  if (penalize.diagonal) {
+    selected.indices <- which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE)
+  } else {
+    selected.indices <- which(Theta_hat != 0 & row(Theta_hat) > col(Theta_hat), arr.ind = TRUE)
+  }
+
   # create S3 object with both user-facing and internal elements
   out <- structure(
     list(
 
       # user-facing elements
       adjacency.matrix = Theta_hat != 0,
-      selected.indices = which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE),
+      selected.indices = selected.indices,
       data.splitting = data.splitting,
       split.proportion = split.proportion,
 

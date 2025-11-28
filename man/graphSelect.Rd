@@ -19,7 +19,7 @@ graphSelect(
 \arguments{
 \item{data}{Data matrix (n x p)}
 
-\item{lambda}{Tuning parameter for the penalty (default: sqrt(log(p)/n))}
+\item{lambda}{Tuning parameter for the penalty (default: sqrt(2*log(p)/n)). For valid selective inference, lambda should be chosen independently of the data used for selection.}
 
 \item{gamma}{Additional tuning parameter for certain penalties (default: 0.5 for elastic net, 3.7 for SCAD, 2.0 for MCP)}
 
