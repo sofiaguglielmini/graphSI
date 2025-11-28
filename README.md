@@ -9,7 +9,7 @@ GraphSI provides tools for selection and post-selection inference in undirected 
 ## Installation
 ```r
 # Install from GitHub
-remotes::install_github("yourusername/GraphSI")
+remotes::install_github("sofiaguglielmini/GraphSI")
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ inference
 - Lee, Jason D., et al. "Exact post-selection inference, with application to the lasso." (2016): 907-927.
 
 ### Graphical lasso selection
-- Friedman, J., Hastie, T., & Tibshirani, R. (2008). Sparse inverse covariance estimation with the graphical lasso. *Biostatistics*, 9(3), 432–441.
+- Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. "Sparse inverse covariance estimation with the graphical lasso." Biostatistics 9.3 (2008): 432-441.
 - Yuan, Ming, and Yi Lin. "Model selection and estimation in the Gaussian graphical model." Biometrika 94.1 (2007): 19-35.
 
 ### Graphical elastic net selection
