@@ -2,7 +2,7 @@
 The aim of the graphSI package is to provide tools for selection and post-selection inference in undirected graphical models. 
 
 Once a model has been selected, a question of crucial importance is often that of carrying out statistical inference and making statements on the variability of the estimators. In his vote of thanks for Tibshirani (1996), Bühlmann (2010) 
-> suggest[s] that we interpret the second 's' in lasso as 'screening' rather than 'selection'. Once we have the screening property, the task is to remove the false positive selections. [...] The issue of assigning uncertainty and variability in high dimensional statistical inference deserves further research. For example, questions about power are largely unanswered.
+> Suggest[s] that we interpret the second 's' in lasso as 'screening' rather than 'selection'. Once we have the screening property, the task is to remove the false positive selections. [...] The issue of assigning uncertainty and variability in high dimensional statistical inference deserves further research. For example, questions about power are largely unanswered.
 
 In an analogous way, in the context of regularized Gaussian graphical models, Williams (2020) states how
 > Researchers always want to do more than detect nonzero relations in GGMs. For example, to determine which edges are the strongest or to rule relations out of the 'network' (i.e., conditional independence), each of which requires more than merely mining data. In other words, statistical inference still requires a p-value or confidence interval, neither of which is straightforward to obtain after data-driven model selection. [...] [non-convex regularization] has its place, for example, to gain the first glimpse into a dependence structure or to formulate hypotheses to then test with inferential statistics.
@@ -25,9 +25,13 @@ n <- 100
 p <- 10
 Sigma <- diag(p)
 data <- mvrnorm(n, mu=rep(0,p), Sigma=Sigma)
+
 # Selection
 selected <- graphSelect(data, penalty="lasso", data.splitting=FALSE, seed=1)
+
+# View the selected edges
 selected
+
 # Inference on the j-th selected edge with polyhedral selective inference:
 inference <- graphInference(data, selected, j, nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
 inference
