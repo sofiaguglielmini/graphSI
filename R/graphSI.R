@@ -8,7 +8,8 @@
 #' @param data.splitting Logical indicating whether to use data splitting for inference (default: FALSE)
 #' @param split.proportion Proportion of data to use for selection if data.splitting is TRUE (default: 0.5)
 #' @param loss Loss function to use (default: "Gaussian")
-#' @param penalty Penalty to use for graph selection (default: "lasso"). Options: "lasso", "elastic net", "scad", "mcp". The diagonal elements of the precision matrix are not penalized.
+#' @param penalty Penalty to use for graph selection (default: "lasso"). Options: "lasso", "elastic net", "scad", "mcp".
+#' @param penalize.diagonal Logical indicating whether to penalize diagonal elements of the precision matrix (default: FALSE)
 #' @param seed Random seed for data splitting (default: NULL)
 #' @return An S3 object of class 'graphSelect' with user-facing elements: adjacency matrix, selected indices, data splitting info. Internal elements also stored but hidden from print().
 #' @export
@@ -19,8 +20,6 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
                         penalty = c("lasso", "elastic net", "scad", "mcp"),
                         penalize.diagonal = FALSE,
                         seed = NULL){
-
-  # penalize.diagonal = FALSE  # do not penalize diagonal elements by default
 
   penalty <- match.arg(penalty)
   loss <- match.arg(loss)
