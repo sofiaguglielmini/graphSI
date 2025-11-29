@@ -17,9 +17,10 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
                         split.proportion = NULL,
                         loss = c("Gaussian"),
                         penalty = c("lasso", "elastic net", "scad", "mcp"),
+                        penalize.diagonal = FALSE,
                         seed = NULL){
 
-  penalize.diagonal = FALSE  # do not penalize diagonal elements by default
+  # penalize.diagonal = FALSE  # do not penalize diagonal elements by default
 
   penalty <- match.arg(penalty)
   loss <- match.arg(loss)
@@ -57,12 +58,12 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
       Theta_hat <- selection_step$wi
       Sigma_hat <- selection_step$w
     } else if(penalty == "elastic net"){
-      selection_step <- GLassoElnetFast::gelnet(Sn, lambda, gamma, penalize.diagonal=penalize.diagonal)
+      selection_step <- GLassoElnetFast::gelnet(Sn, lambda, gamma, penalize.diagonal=penalize.diagonal, Target=0*diag(p))
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$W
     } else if(penalty %in% c("scad", "mcp")){
       selection_step <- suppressMessages(GGMncv::ggmncv(Sn, n, penalty=penalty, lambda=lambda, gamma=gamma,
-                                       penalize_diagonal=penalize.diagonal, LLA = TRUE, maxit=1e05, thr=1e-06))
+                                       penalize_diagonal=penalize.diagonal, LLA = TRUE, maxit=1e05, thr=1e-06, initial=glassoFast::glassoFast(Sn, lambda)$wi))
       Theta_hat <- selection_step$Theta
       Sigma_hat <- selection_step$Sigma
     }

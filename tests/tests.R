@@ -1,7 +1,7 @@
 # test that graphSelect and graphInference work
 set.seed(1)
-n <- 50
-p <- 50
+n <- 100
+p <- 10
 library(MASS)
 Sigma <- diag(p)
 for(i in 1:(p-1)){
@@ -13,14 +13,16 @@ for(i in 1:(p-1)){
 }
 Theta <- round(solve(Sigma),3)
 pval <- NA
-for(jsim in 1:1000){
+devtools::load_all()
+for(jsim in 1:500){
   data <- mvrnorm(n, mu=rep(0,p), Sigma=Sigma)
-  selected <- graphSelect(data, penalty="lasso", lambda=NULL, data.splitting=F)
-  j <- sample(1:nrow(selected$selected.indices), 3)
+  selected <- graphSelect(data, penalty="mcp", lambda=NULL, data.splitting=F, penalize.diagonal = T)
+  j <- sample(1:nrow(selected$selected.indices), 1)
   true.value <- Theta[selected$selected.indices[j,1],selected$selected.indices[j,2]]
-  # if(true.value!=0) next
+  if(true.value!=0) next
+  devtools::load_all()
   inference <- graphInference(data, selected, j, nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
-  pval[jsim] <- inference$p_value
+  pval[jsim] <- inference[[1]]$p_value
 }
 hist(pval)
 mean(pval<0.05, na.rm=TRUE)
