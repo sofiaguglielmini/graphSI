@@ -1,15 +1,21 @@
-# graphSI: Selection and Inference in graphical models
-GraphSI provides tools for selection and post-selection inference in undirected graphical models. 
+# graphSI: Selection and Inference in Graphical Models
+The aim of the graphSI package is to provide tools for selection and post-selection inference in undirected graphical models. 
 
-## Features
-- **Graph selection**: Estimate the structure of an undirected graphical model from a data matrix using the graphical lasso (Friedman et al. 2008), graphical elastic net (Kovács et al. 2021), or the SCAD (Fan et al. 2009) or MCP (Zhang et al. 2010) penalties. The selection with the non-convex penalties SCAD and MCP uses local linear approximations (GGMncv; Williams, 2020).
-- **Data-splitting inference**: Split the data to separate selection and inference, overcoming selection bias.
-- **Polyhedral selective inference**: Compute asymptotic post-selection inference for the selected edges, using the entire data for selection and inference and conditioning on selection (Guglielmini and Claeskens, 2025), using the polyhedral lemma (Lee et al. 2016).
+Once a model has been selected, a question of crucial importance is often that of carrying out statistical inference and making statements on the variability of the estimators. In his vote of thanks for Tibshirani (1996), Bühlmann (2010) 
+> suggest[s] that we interpret the second 's' in lasso as 'screening' rather than 'selection'. Once we have the screening property, the task is to remove the false positive selections. [...] The issue of assigning uncertainty and variability in high dimensional statistical inference deserves further research. For example, questions about power are largely unanswered.
+
+In an analogous way, in the context of regularized Gaussian graphical models, Williams (2020) states how
+> Researchers always want to do more than detect nonzero relations in GGMs. For example, to determine which edges are the strongest or to rule relations out of the 'network' (i.e., conditional independence), each of which requires more than merely mining data. In other words, statistical inference still requires a p-value or confidence interval, neither of which is straightforward to obtain after data-driven model selection. [...] [non-convex regularization] has its place, for example, to gain the first glimpse into a dependence structure or to formulate hypotheses to then test with inferential statistics.
 
 ## Installation
 ```r
 remotes::install_github("sofiaguglielmini/graphSI")
 ```
+
+## Features
+- **Graph selection**: Estimate the structure of an undirected graphical model from a data matrix using the graphical lasso (Friedman et al. 2008), graphical elastic net (Kovács et al. 2021), or the SCAD (Fan et al. 2009) or MCP (Zhang et al. 2010) penalties. The selection with the non-convex penalties SCAD and MCP uses local linear approximations (GGMncv; Williams, 2020).
+- **Data-splitting inference**: Split the data to separate selection and inference, overcoming selection bias.
+- **Polyhedral selective inference**: Compute asymptotic post-selection inference for the selected edges, using the entire data for selection and inference and conditioning on selection (Guglielmini and Claeskens, 2025), using the polyhedral lemma (Lee et al. 2016).
 
 ## Usage
 ```r
@@ -28,12 +34,23 @@ inference
 ```
 
 ## References
-- Fan, Jianqing, Yang Feng, and Yichao Wu. "Network exploration via the adaptive LASSO and SCAD penalties." The annals of applied statistics 3.2 (2009): 521.
-- Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. "Sparse inverse covariance estimation with the graphical lasso." Biostatistics 9.3 (2008): 432-441.
-- Guglielmini, Sofia, and Gerda Claeskens. "Asymptotic post-selection inference for regularized graphical models." Statistics and Computing 35.2 (2025): 36.
-- Kovács, Solt, et al. "Graphical elastic net and target matrices: Fast algorithms and software for sparse precision matrix estimation." arXiv preprint arXiv:2101.02148 (2021).
-- Lee, Jason D., et al. "Exact post-selection inference, with application to the lasso." (2016): 907-927.
-- Williams, Donald R. "Beyond lasso: A survey of nonconvex regularization in Gaussian graphical models." (2020).
-- Yuan, Ming, and Yi Lin. "Model selection and estimation in the Gaussian graphical model." Biometrika 94.1 (2007): 19-35.
-- Zhang, Cun-Hui. "Nearly unbiased variable selection under minimax concave penalty." (2010): 894-942.
+Bühlmann, Peter. "Proposing the vote of thanks: Regression shrinkage and selection via the Lasso: a retrospective by Robert Tibshirani." 2010.
+
+Fan, Jianqing, Yang Feng, and Yichao Wu. "Network exploration via the adaptive LASSO and SCAD penalties." _The Annals of Applied Statistics_ 3.2 (2009): 521.
+
+Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. "Sparse inverse covariance estimation with the graphical lasso." _Biostatistics_ 9.3 (2008): 432-441.
+
+Guglielmini, Sofia, and Gerda Claeskens. "Asymptotic post-selection inference for regularized graphical models." _Statistics and Computing_ 35.2 (2025): 36.
+
+Kovács, Solt, et al. "Graphical elastic net and target matrices: Fast algorithms and software for sparse precision matrix estimation." _arXiv preprint_ arXiv:2101.02148 (2021).
+
+Lee, Jason D., et al. "Exact post-selection inference, with application to the lasso." Annals of Statistics 44.3 (2016): 907-927.
+
+Tibshirani, Robert. "Regression shrinkage and selection via the lasso." _Journal of the Royal Statistical Society Series B: Statistical Methodology_ 58.1 (1996): 267-288.
+
+Williams, Donald R. 2020. "Beyond Lasso: A Survey of Nonconvex Regularization in Gaussian Graphical Models." _PsyArXiv_.
+
+Yuan, Ming, and Yi Lin. "Model selection and estimation in the Gaussian graphical model." _Biometrika_ 94.1 (2007): 19-35.
+
+Zhang, Cun Hui. "Nearly unbiased variable selection under minimax concave penalty." _Annals of Statistics_ 38.2 (2010): 894-942.
 
