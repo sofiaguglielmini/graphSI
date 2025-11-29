@@ -8,8 +8,7 @@ GraphSI provides tools for selection and post-selection inference in undirected 
 
 ## Installation
 ```r
-# Install from GitHub
-remotes::install_github("sofiaguglielmini/GraphSI")
+remotes::install_github("sofiaguglielmini/graphSI")
 ```
 
 ## Usage
