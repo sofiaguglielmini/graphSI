@@ -1,27 +1,23 @@
 #' @title Polyhedral inference for graphical models
 #' @description Perform hypothesis testing and construct confidence intervals for edges in a selected graphical model using the polyhedral method.
 #' @param X Data matrix (n x p)
-#' @param j Index of the edge to perform inference on (in vech form)
+#' @param j Indices of the edges to perform inference on (in vech form)
 #' @param nullvalue Null value for the hypothesis test
 #' @param selected Output from graphSelect function
 #' @param sandwich.variance Logical indicating whether to use sandwich variance estimator (default: FALSE)
 #' @param alpha Significance level for confidence intervals (default: 0.05)
 #' @return A list containing the p-value, lower and upper bounds of the confidence interval
 graphInference_polyhedral <- function(X, j, nullvalue, selected,
-                             sandwich.variance,
-                             alpha){
+                                      sandwich.variance = FALSE,
+                                      alpha = 0.05){
   E <- selected$E
-  estimated <- graph_estimate(X = X,
-                              selected = selected,
-                              sandwich.variance = sandwich.variance)
+  estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
+  conditional <- graph_polyhedral_conditioning(X = X, selected = selected, estimated = estimated)
 
-  conditional <- graph_polyhedral_conditioning(X = X,
-                                               selected = selected,
-                                               estimated = estimated)
-
-  inference <- inference_truncatedGaussian(conditional$theta_onestepE, j, conditional$Sigma_E/nrow(X),
-                                           nullvalue, conditional$A, conditional$b, alpha)
-  inference
+  lapply(j, function(idx) {
+    inference_truncatedGaussian(conditional$theta_onestepE, idx, conditional$Sigma_E/nrow(X),
+                                nullvalue, conditional$A, conditional$b, alpha)
+  })
 }
 
 #' @title Polyhedral conditioning for graphical models
