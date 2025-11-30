@@ -1,5 +1,5 @@
 # graphSI: Selection and Inference in Graphical Models
-The aim of the graphSI package is to provide tools for selection and post-selection inference in undirected graphical models. 
+The aim of the graphSI package is to provide tools for selection and post-selection inference in Gaussian graphical models. 
 
 Once a model has been selected, a question of crucial importance is often that of carrying out statistical inference and making statements on the variability of the estimators. In his vote of thanks for Tibshirani (1996), Bühlmann (2010) 
 > Suggest[s] that we interpret the second 's' in lasso as 'screening' rather than 'selection'. Once we have the screening property, the task is to remove the false positive selections. [...] The issue of assigning uncertainty and variability in high dimensional statistical inference deserves further research. For example, questions about power are largely unanswered.
@@ -14,8 +14,18 @@ remotes::install_github("sofiaguglielmini/graphSI")
 
 ## Features
 - **Graph selection**: Estimate the structure of an undirected graphical model from a data matrix using the graphical lasso (Friedman et al. 2008), graphical elastic net (Kovács et al. 2021), or the SCAD (Fan et al. 2009) or MCP (Zhang et al. 2010) penalties. The selection with the non-convex penalties SCAD and MCP uses local linear approximations (GGMncv; Williams, 2020).
-- **Data-splitting inference**: Split the data to separate selection and inference, overcoming selection bias.
 - **Polyhedral selective inference**: Compute asymptotic post-selection inference for the selected edges, using the entire data for selection and inference and conditioning on selection (Guglielmini and Claeskens, 2025), using the polyhedral lemma (Lee et al. 2016).
+- **Data-splitting inference**: Split the data to separate selection and inference.
+
+## Functions
+
+`graphSelect()`
+Implements model selection for Gaussian graphical models using regularized estimation.  Supports lasso, elastic net, SCAD, and MCP penalties, with optional diagonal penalization and optional data splitting. Returns an object containing the adjacency matrix and selected edge indices.
+For valid selective inference, `lambda` must be chosen independently of the data used for selection.  
+
+`graphInference()`
+Performs inference for a selected edge using either the polyhedral method or data splitting. The method is determined by the `graphSelect` object passed through the `selected` argument. 
+Returns a p–value and confidence interval for the chosen elements of the precision matrix.
 
 ## Usage
 ```r
