@@ -14,7 +14,7 @@ remotes::install_github("sofiaguglielmini/graphSI")
 
 ## Features
 - **Graph selection**: Estimate the structure of an undirected graphical model from a data matrix using the graphical lasso (Friedman et al. 2008), graphical elastic net (Kovács et al. 2021), or the SCAD (Fan et al. 2009) or MCP (Zhang et al. 2010) penalties. The selection with the non-convex penalties SCAD and MCP uses local linear approximations (GGMncv; Williams, 2020).
-- - **Polyhedral selective inference**: Compute asymptotic post-selection inference for the selected edges, using the entire data for selection and inference and conditioning on selection (Guglielmini and Claeskens, 2025), using the polyhedral lemma (Lee et al. 2016).
+- **Polyhedral selective inference**: Compute asymptotic post-selection inference for the selected edges, using the entire data for selection and inference and conditioning on selection (Guglielmini and Claeskens, 2025), using the polyhedral lemma (Lee et al. 2016).
 - **Data-splitting inference**: Split the data to separate selection and inference.
 
 ## Functions
