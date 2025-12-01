@@ -20,7 +20,7 @@ remotes::install_github("sofiaguglielmini/graphSI")
 ## Functions
 
 `graphSelect()`
-Implements model selection for Gaussian graphical models using regularized estimation.  Supports lasso, elastic net, SCAD, and MCP penalties, with optional diagonal penalization and optional data splitting. Returns an object containing the adjacency matrix and selected edge indices.
+Implements model selection for Gaussian graphical models using regularized estimation. Supports lasso (using `glassoFast`), elastic net (using `GLassoElnetFast`), SCAD and MCP penalties (using `GGMncv`), with optional diagonal penalization and optional data splitting. Returns an object containing the adjacency matrix and selected edge indices.
 For valid selective inference, `lambda` must be chosen independently of the data used for selection.  
 
 `graphInference()`
