@@ -20,7 +20,7 @@ For valid selective inference, `lambda` must be chosen independently of the data
 
 `graphInference()`
 Performs inference for a selected edge using either the polyhedral method or data splitting. The method is determined by the `graphSelect` object passed through the `selected` argument. 
-Returns a p–value and confidence interval for the chosen elements of the precision matrix.
+Returns a p-value and confidence interval for the chosen elements of the precision matrix.
 
 ## Usage
 ```r
