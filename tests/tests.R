@@ -18,7 +18,7 @@ pval <- NA
 devtools::load_all()
 for(jsim in 1:500){
   data <- mvrnorm(n, mu=rep(0,p), Sigma=Sigma)
-  selected <- graphSelect(data, penalty="lasso", lambda=NULL, data.splitting=F, penalize.diagonal = T)
+  selected <- graphSelect(data, penalty="lasso", lambda=NULL, data.splitting=F, penalize.diagonal = F)
   j <- "all"
   selected$selected.edges
   # true.value <- Theta[selected$selected.indices[j,1],selected$selected.indices[j,2]]

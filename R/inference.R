@@ -26,8 +26,6 @@ inference_Gaussian <- function(theta, se, nullvalue, alpha){
 #' @param alpha Significance level for confidence intervals
 #' @return A list containing the p-value, lower and upper bounds of the confidence interval
 inference_truncatedGaussian <- function(theta, j, Var, nullvalue, A, b, alpha){
-  print(length(theta))
-  print(j)
   eta_j <- c(rep(0, j-1), 1, rep(0, length(theta)-j))
   p_tg <- selectiveInference::TG.pvalue(Z = theta, A = A, b =  b,
                                              eta = eta_j,
