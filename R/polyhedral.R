@@ -255,5 +255,5 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
   if(!all(A %*% theta_onestep[Ep] <= b)){
     stop("Affine constraint not satisfied.")
   }
-  list(A = A, b = b, theta_onestepE = theta_onestep[Ep], Sigma_E = Sigma_Ep, Theta_onestep = sym_to_vech(p, theta_onestep))
+  list(A = A, b = b, theta_onestepE = theta_onestep[Ep], Sigma_E = Sigma_Ep, Theta_onestep = vech_to_sym(theta_onestep, p))
 }
