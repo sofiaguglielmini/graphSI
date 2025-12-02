@@ -18,7 +18,7 @@ graphInference_polyhedral <- function(X, j, nullvalue, selected,
     inference_truncatedGaussian(conditional$theta_onestepE, idx, conditional$Sigma_E/nrow(X),
                                 nullvalue, conditional$A, conditional$b, alpha)
   })
-  return(list(inference = inference, estimated.graph = estimated$Theta_bar))
+  return(list(inference = inference, estimated.graph = conditional$Theta_onestep))
 }
 
 #' @title Polyhedral conditioning for graphical models
@@ -255,5 +255,5 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
   if(!all(A %*% theta_onestep[Ep] <= b)){
     stop("Affine constraint not satisfied.")
   }
-  list(A = A, b = b, theta_onestepE = theta_onestep[Ep], Sigma_E = Sigma_Ep)
+  list(A = A, b = b, theta_onestepE = theta_onestep[Ep], Sigma_E = Sigma_Ep, Theta_onestep = sym_to_vech(p, theta_onestep))
 }
