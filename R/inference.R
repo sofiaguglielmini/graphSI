@@ -43,6 +43,6 @@ inference_truncatedGaussian <- function(theta, j, Var, nullvalue, A, b, alpha){
        p_value = p_value,
        ci_lower = ci_lower,
        ci_upper = ci_upper,
-       estimate = eta_j*theta)
+       estimate = eta_j%*%theta)
 }
 

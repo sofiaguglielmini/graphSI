@@ -90,6 +90,7 @@ graph_polyhedral_conditioning <- function(X, selected, estimated){
 
   # Affine constraints
   if(penalty == "lasso"){
+    # print(cbind(subgrad[Ep], sign(theta_hat[Ep])))
     theta_perp[nE] <- lambda * subgrad[nE] - lambda*Hn[nE,Ep, drop=F]%*%H_hat_EpEp_inv%*%subgrad[Ep] + A_perp %*% theta_onestep[Ep]
 
     A1 <- - diag(sign(theta_hat[Ep]), nrow = length(Ep))
