@@ -72,10 +72,11 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
   E <- which(fastmatrix::vech(1 * (Theta_hat != 0)) != 0)
   nE <- which(fastmatrix::vech(1 * (Theta_hat != 0)) == 0)
 
-  if (penalize.diagonal) {
-    selected.indices <- which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE)
-  } else {
-    selected.indices <- which(Theta_hat != 0 & row(Theta_hat) > col(Theta_hat), arr.ind = TRUE)
+  selected.indices <- which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE)
+  selected.edges <- which(Theta_hat != 0 & row(Theta_hat) > col(Theta_hat), arr.ind = TRUE)
+
+  if (!penalize.diagonal) {
+    selected.indices <- selected.edges
   }
 
   # create S3 object with both user-facing and internal elements
@@ -84,11 +85,12 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
 
       # user-facing elements
       adjacency.matrix = Theta_hat != 0,
-      selected.indices = selected.indices,
+      selected.edges = selected.edges,
       data.splitting = data.splitting,
       split.proportion = split.proportion,
 
       # internal elements
+      selected.indices = selected.indices,
       Theta_hat = Theta_hat,
       Sigma_hat = Sigma_hat,
       theta_hat = theta_hat,
@@ -112,8 +114,8 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
 print.graphSelect <- function(x, ...) {
   cat("Selected Graph:\n")
   print(x$adjacency.matrix)
-  cat("\nSelected indices:\n")
-  print(x$selected.indices)
+  cat("\nSelected edges:\n")
+  print(x$selected.edges)
   if(x$data.splitting) {
     cat("\nData splitting used, proportion:", x$split.proportion, "\n")
   }
