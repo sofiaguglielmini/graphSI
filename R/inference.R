@@ -13,7 +13,8 @@ inference_Gaussian <- function(theta, se, nullvalue, alpha, j){
   list(index = j,
        p_value = p_value,
        ci_lower = ci_lower,
-       ci_upper = ci_upper)
+       ci_upper = ci_upper,
+       estimate = theta)
 }
 
 #' Get truncated Gaussian p-value and confidence interval
@@ -40,6 +41,7 @@ inference_truncatedGaussian <- function(theta, j, Var, nullvalue, A, b, alpha){
   list(index = j,
        p_value = p_value,
        ci_lower = ci_lower,
-       ci_upper = ci_upper)
+       ci_upper = ci_upper,
+       estimate = theta[j])
 }
 

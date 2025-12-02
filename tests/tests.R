@@ -17,10 +17,10 @@ devtools::load_all()
 for(jsim in 1:500){
   data <- mvrnorm(n, mu=rep(0,p), Sigma=Sigma)
   selected <- graphSelect(data, penalty="mcp", lambda=NULL, data.splitting=F, penalize.diagonal = T)
-  j <- sample(1:nrow(selected$selected.indices), 1)
+  j <- sample(1:nrow(selected$selected.indices), 3)
   true.value <- Theta[selected$selected.indices[j,1],selected$selected.indices[j,2]]
   if(true.value!=0) next
-  devtools::load_all()
+
   inference <- graphInference(data, selected, j, nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
   pval[jsim] <- inference[[1]]$p_value
 }
