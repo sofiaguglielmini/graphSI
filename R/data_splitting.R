@@ -14,8 +14,9 @@ graphInference_datasplitting <- function(X, j, nullvalue, selected,
   E <- selected$E
   estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
 
-  lapply(j, function(idx) {
+  inference <- lapply(j, function(idx) {
     inference_Gaussian(estimated$theta_bar[E][idx], sqrt(estimated$Sigma_E[idx, idx]/n2), nullvalue, alpha, j[idx])
   })
+  return(list(inference = inference, estimated.graph = estimated$Theta_bar))
 }
 

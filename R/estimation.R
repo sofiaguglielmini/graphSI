@@ -34,6 +34,7 @@ graph_estimate <- function(X, selected, sandwich.variance){
   }
   list(Sn = Sn,
        theta_bar = theta_bar,
+       Theta_bar = Theta_bar,
        Sigma_E = Sigma_E,
        Jn = Jn,
        Hn = Hn,

@@ -14,10 +14,11 @@ graphInference_polyhedral <- function(X, j, nullvalue, selected,
   estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
   conditional <- graph_polyhedral_conditioning(X = X, selected = selected, estimated = estimated)
 
-  lapply(j, function(idx) {
+  inference <- lapply(j, function(idx) {
     inference_truncatedGaussian(conditional$theta_onestepE, idx, conditional$Sigma_E/nrow(X),
                                 nullvalue, conditional$A, conditional$b, alpha)
   })
+  return(list(inference = inference, estimated.graph = estimated$Theta_bar))
 }
 
 #' @title Polyhedral conditioning for graphical models
