@@ -1,11 +1,6 @@
 # graphSI: Selection and Inference in Graphical Models
-The aim of the graphSI package is to provide tools for selection and post-selection inference in Gaussian graphical models. 
 
-Once a model has been selected, a question of crucial importance is often that of carrying out statistical inference and making statements on the variability of the estimators. In his vote of thanks for Tibshirani (1996), Bühlmann (2010) 
-> Suggest[s] that we interpret the second 's' in lasso as 'screening' rather than 'selection'. Once we have the screening property, the task is to remove the false positive selections. [...] The issue of assigning uncertainty and variability in high dimensional statistical inference deserves further research. For example, questions about power are largely unanswered.
-
-In an analogous way, in the context of regularized Gaussian graphical models, Williams (2020) states how
-> Researchers always want to do more than detect nonzero relations in GGMs. For example, to determine which edges are the strongest or to rule relations out of the 'network' (i.e., conditional independence), each of which requires more than merely mining data. In other words, statistical inference still requires a p-value or confidence interval, neither of which is straightforward to obtain after data-driven model selection. [...] [non-convex regularization] has its place, for example, to gain the first glimpse into a dependence structure or to formulate hypotheses to then test with inferential statistics.
+The graphSI package provides tools for selection and post-selection inference in Gaussian graphical models. It wraps commonly used graph selection methods and enables valid inference in the selected model, either using conditional post-selection inference on the entire dataset (Guglielmini and Claeskens, 2025) or data splitting. This allows researchers not only to detect nonzero relations but also to quantify the strength and uncertainty of edges in the network.
 
 ## Installation
 ```r
@@ -20,12 +15,12 @@ remotes::install_github("sofiaguglielmini/graphSI")
 ## Functions
 
 `graphSelect()`
-Implements model selection for Gaussian graphical models using regularized estimation.  Supports lasso, elastic net, SCAD, and MCP penalties, with optional diagonal penalization and optional data splitting. Returns an object containing the adjacency matrix and selected edge indices.
+Implements model selection for Gaussian graphical models using regularized estimation. Supports lasso (using `glassoFast`), elastic net (using `GLassoElnetFast`), SCAD and MCP penalties (using `GGMncv`), with optional diagonal penalization and optional data splitting. Returns an object containing the adjacency matrix and selected edge indices.
 For valid selective inference, `lambda` must be chosen independently of the data used for selection.  
 
 `graphInference()`
 Performs inference for a selected edge using either the polyhedral method or data splitting. The method is determined by the `graphSelect` object passed through the `selected` argument. 
-Returns a p–value and confidence interval for the chosen elements of the precision matrix.
+Returns a p-value and confidence interval for the chosen elements of the precision matrix.
 
 ## Usage
 ```r
@@ -46,6 +41,13 @@ selected
 inference <- graphInference(data, selected, j, nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
 inference
 ```
+## Motivation
+
+Once a model has been selected, a question of crucial importance is often that of carrying out statistical inference and making statements on the variability of the estimators. In his vote of thanks for Tibshirani (1996), Bühlmann (2010) 
+> Suggest[s] that we interpret the second 's' in lasso as 'screening' rather than 'selection'. Once we have the screening property, the task is to remove the false positive selections. [...] The issue of assigning uncertainty and variability in high dimensional statistical inference deserves further research. For example, questions about power are largely unanswered.
+
+In an analogous way, in the context of regularized Gaussian graphical models, Williams (2020) states how
+> Researchers always want to do more than detect nonzero relations in GGMs. For example, to determine which edges are the strongest or to rule relations out of the 'network' (i.e., conditional independence), each of which requires more than merely mining data. In other words, statistical inference still requires a p-value or confidence interval, neither of which is straightforward to obtain after data-driven model selection. [...] [non-convex regularization] has its place, for example, to gain the first glimpse into a dependence structure or to formulate hypotheses to then test with inferential statistics.
 
 ## References
 Bühlmann, Peter. "Proposing the vote of thanks: Regression shrinkage and selection via the Lasso: a retrospective by Robert Tibshirani." 2010.
