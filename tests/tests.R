@@ -11,19 +11,23 @@ for(i in 1:(p-1)){
     Sigma[j,i] <- Sigma[i,j]
   }
 }
+diags <- cumsum(p:1) - (p - 1:p)
 Theta <- round(solve(Sigma),3)
 Theta
 pval <- NA
 devtools::load_all()
 for(jsim in 1:500){
   data <- mvrnorm(n, mu=rep(0,p), Sigma=Sigma)
-  selected <- graphSelect(data, penalty="lasso", lambda=NULL, data.splitting=F, penalize.diagonal = F)
-  j <- 1:nrow(selected$selected.indices)
-  true.value <- Theta[selected$selected.indices[j,1],selected$selected.indices[j,2]]
-  if(true.value!=0) next
+  selected <- graphSelect(data, penalty="lasso", lambda=NULL, data.splitting=F, penalize.diagonal = T)
+  j <- "all"
+  selected$selected.edges
+  # true.value <- Theta[selected$selected.indices[j,1],selected$selected.indices[j,2]]
+  # if(true.value!=0) next
 
-  inference <- graphInference(data, selected, j, nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
-  inference$inference
+  inference <- graphInference(data, selected, to.test="all", nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
+  W <- diag(inference$estimated.graph[inference$inference$row, inference$inference$col])
+  cbind(inference$inference, W)
+
   pval[jsim] <- inference[[1]]$p_value
 }
 hist(pval)

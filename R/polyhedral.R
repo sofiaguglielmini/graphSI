@@ -13,12 +13,20 @@ graphInference_polyhedral <- function(X, j, nullvalue, selected,
   E <- selected$E
   estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
   conditional <- graph_polyhedral_conditioning(X = X, selected = selected, estimated = estimated)
+  if(is.character(j) && j == "all"){
+    p <- ncol(X)
+    diags <- cumsum(p:1) - (p - 1:p)
+    if(!selected$penalize.diagonal) E <- E[!E %in% diags]
+    j <- 1:length(E)
+    if(selected$penalize.diagonal) j <- j[!E[j] %in% diags]
+  }
 
   inference <- lapply(j, function(idx) {
     inference_truncatedGaussian(conditional$theta_onestepE, idx, conditional$Sigma_E/nrow(X),
                                 nullvalue, conditional$A, conditional$b, alpha)
   })
   inference <- do.call(rbind, inference)
+  inference <- cbind(selected$selected.edges, inference)
   return(list(inference = inference, estimated.graph = conditional$Theta_onestep))
 }
 

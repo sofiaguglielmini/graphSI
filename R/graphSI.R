@@ -72,12 +72,8 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
   E <- which(fastmatrix::vech(1 * (Theta_hat != 0)) != 0)
   nE <- which(fastmatrix::vech(1 * (Theta_hat != 0)) == 0)
 
-  selected.indices <- which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE)
+  selected_all <- which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE)
   selected.edges <- which(Theta_hat != 0 & row(Theta_hat) > col(Theta_hat), arr.ind = TRUE)
-
-  if (!penalize.diagonal) {
-    selected.indices <- selected.edges
-  }
 
   # create S3 object with both user-facing and internal elements
   out <- structure(
@@ -90,7 +86,7 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
       split.proportion = split.proportion,
 
       # internal elements
-      selected.indices = selected.indices,
+      selected_all = selected_all,
       Theta_hat = Theta_hat,
       Sigma_hat = Sigma_hat,
       theta_hat = theta_hat,
@@ -125,14 +121,14 @@ print.graphSelect <- function(x, ...) {
 #' @description Perform inference for a selected edge in the graphical model using either polyhedral or data-splitting methods.
 #' @param data Data matrix (n x p)
 #' @param selected Output from graphSelect function
-#' @param j Index of the edge to perform inference on (in vech form)
+#' @param to.test Index of the edge(s) to perform inference on (corresponding to the row of selected$selected.edges), or "all" to test all selected edges
 #' @param nullvalue Null value for the hypothesis test
 #' @param sandwich.variance Logical indicating whether to use sandwich variance estimator (default: FALSE)
 #' @param alpha Significance level for confidence intervals (default: 0.05)
 #' @param seed Random seed for data splitting (default: NULL)
 #' @return A list containing the p-value, lower and upper bounds of the confidence interval
 #' @export
-graphInference <- function(data, selected, j, nullvalue,
+graphInference <- function(data, selected, to.test, nullvalue,
                     sandwich.variance = FALSE,
                     alpha = 0.05, seed = NULL){
   if(selected$data.splitting){
@@ -146,11 +142,11 @@ graphInference <- function(data, selected, j, nullvalue,
   }
   X <- scale(X)
   if(method == "Polyhedral"){
-    out <- graphInference_polyhedral(X = X, j, nullvalue, selected = selected,
+    out <- graphInference_polyhedral(X = X, j=to.test, nullvalue, selected = selected,
                               sandwich.variance = sandwich.variance,
                               alpha = alpha)
   } else if(method == "Data splitting"){
-    out <- graphInference_datasplitting(X = X, j, nullvalue, selected = selected,
+    out <- graphInference_datasplitting(X = X, j=to.test, nullvalue, selected = selected,
                                  sandwich.variance = sandwich.variance,
                                  alpha = alpha)
   }
