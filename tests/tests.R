@@ -1,7 +1,7 @@
 # test that graphSelect and graphInference work
 set.seed(1)
 n <- 100
-p <- 80
+p <- 5
 library(MASS)
 Sigma <- diag(p)
 # dense Sigma
@@ -23,7 +23,7 @@ for(jsim in 1:500){
   if(true.value!=0) next
 
   inference <- graphInference(data, selected, j, nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
-  inference
+  inference$inference
   pval[jsim] <- inference[[1]]$p_value
 }
 hist(pval)

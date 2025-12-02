@@ -18,6 +18,7 @@ graphInference_polyhedral <- function(X, j, nullvalue, selected,
     inference_truncatedGaussian(conditional$theta_onestepE, idx, conditional$Sigma_E/nrow(X),
                                 nullvalue, conditional$A, conditional$b, alpha)
   })
+  inference <- do.call(rbind, inference)
   return(list(inference = inference, estimated.graph = conditional$Theta_onestep))
 }
 

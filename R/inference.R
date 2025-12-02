@@ -10,7 +10,7 @@ inference_Gaussian <- function(theta, se, nullvalue, alpha, j){
   z_alpha <- qnorm(1 - alpha/2)
   ci_lower <- theta - z_alpha * se
   ci_upper <- theta + z_alpha * se
-  list(index = j,
+  data.frame(index = j,
        p_value = p_value,
        ci_lower = ci_lower,
        ci_upper = ci_upper,
@@ -39,10 +39,10 @@ inference_truncatedGaussian <- function(theta, j, Var, nullvalue, A, b, alpha){
   p_value <- 2 * min(p_tg, 1 - p_tg)
   ci_lower <- int_tg[1]
   ci_upper <- int_tg[2]
-  list(index = j,
+  data.frame(index = j,
        p_value = p_value,
        ci_lower = ci_lower,
        ci_upper = ci_upper,
-       estimate = eta_j%*%theta)
+       estimate = theta[j])
 }
 
