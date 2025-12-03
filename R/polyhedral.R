@@ -9,7 +9,7 @@
 #' @return A list containing the p-value, lower and upper bounds of the confidence interval
 graphInference_polyhedral <- function(X, j, nullvalue, selected,
                                       sandwich.variance = FALSE,
-                                      alpha = 0.05){s
+                                      alpha = 0.05){
   estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
 
   if(is.character(j) && j == "none"){
