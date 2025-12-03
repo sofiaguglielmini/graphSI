@@ -11,7 +11,7 @@
 #' @param penalty Penalty to use for graph selection (default: "lasso"). Options: "lasso", "elastic net", "scad", "mcp".
 #' @param penalize.diagonal Logical indicating whether to penalize diagonal elements of the precision matrix (default: FALSE)
 #' @param seed Random seed for data splitting (default: NULL)
-#' @return An S3 object of class 'graphSelect' with user-facing elements: adjacency matrix, selected indices, data splitting info. Internal elements also stored but hidden from print().
+#' @return An S3 object of class 'graphSelect' with user-facing elements: adjacency matrix, selected indices (including diagonals if penalized), data splitting info. Internal elements also stored but hidden from print().
 #' @export
 graphSelect <- function(data, lambda = NULL, gamma = NULL,
                         data.splitting = FALSE,
@@ -39,6 +39,7 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
   p <- ncol(X)
   X <- scale(X)
   Sn <- cov(X)
+  diags <- cumsum(p:1) - (p - 1:p)
 
   if(is.null(lambda)) lambda <- sqrt(2*log(p)/n)
   if(is.null(gamma)){
@@ -69,11 +70,15 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
   } else stop("Loss function not recognized.")
 
   theta_hat <- fastmatrix::vech(Theta_hat)
-  E <- which(fastmatrix::vech(1 * (Theta_hat != 0)) != 0)
-  nE <- which(fastmatrix::vech(1 * (Theta_hat != 0)) == 0)
+  E <- which(theta_hat != 0)
+  nE <- which(theta_hat == 0)
+  Ep <- setdiff(E, diags)
 
-  selected_all <- which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE)
-  selected.edges <- which(Theta_hat != 0 & row(Theta_hat) > col(Theta_hat), arr.ind = TRUE)
+  if(!penalize.diagonal){
+    selected.edges <- which(Theta_hat != 0 & row(Theta_hat) > col(Theta_hat), arr.ind = TRUE)
+  } else {
+    selected.edges <- which(Theta_hat != 0 & row(Theta_hat) >= col(Theta_hat), arr.ind = TRUE)
+  }
 
   # create S3 object with both user-facing and internal elements
   out <- structure(
@@ -86,12 +91,12 @@ graphSelect <- function(data, lambda = NULL, gamma = NULL,
       split.proportion = split.proportion,
 
       # internal elements
-      selected_all = selected_all,
       Theta_hat = Theta_hat,
       Sigma_hat = Sigma_hat,
       theta_hat = theta_hat,
       E = E,
       nE = nE,
+      Ep = Ep,
       penalty = penalty,
       loss = loss,
       lambda = lambda,
@@ -121,12 +126,12 @@ print.graphSelect <- function(x, ...) {
 #' @description Perform inference for a selected edge in the graphical model using either polyhedral or data-splitting methods.
 #' @param data Data matrix (n x p)
 #' @param selected Output from graphSelect function
-#' @param to.test Index of the edge(s) to perform inference on (corresponding to the row of selected$selected.edges), or "all" to test all selected edges
+#' @param to.test Index of the edge(s) to perform inference on (corresponding to the row of selected$selected.edges), "all" to test all selected edges, "none" to skip inference and only output the refitted estimator in the selected model
 #' @param nullvalue Null value for the hypothesis test
 #' @param sandwich.variance Logical indicating whether to use sandwich variance estimator (default: FALSE)
 #' @param alpha Significance level for confidence intervals (default: 0.05)
 #' @param seed Random seed for data splitting (default: NULL)
-#' @return A list containing the p-value, lower and upper bounds of the confidence interval
+#' @return A list containing the point estimate, p-value, lower and upper bounds of the confidence interval; and the estimated precision matrix within the selected graph (one-step used for inference; if inference is skipped, then refitted estimator is returned)
 #' @export
 graphInference <- function(data, selected, to.test, nullvalue,
                     sandwich.variance = FALSE,

@@ -23,7 +23,7 @@ graphInference_datasplitting <- function(X, j, nullvalue, selected,
     inference_Gaussian(estimated$theta_bar[E][idx], sqrt(estimated$Sigma_E[idx, idx]/n2), nullvalue, alpha)
   })
   inference <- do.call(rbind, inference)
-  inference <- cbind(selected$selected.edges, inference)
+  inference <- cbind(selected$selected.edges[E,][j,], inference)
   return(list(inference = inference, estimated.graph = estimated$Theta_bar))
 }
 

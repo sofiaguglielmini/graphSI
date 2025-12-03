@@ -18,14 +18,14 @@ pval <- NA
 devtools::load_all()
 for(jsim in 1:500){
   data <- mvrnorm(n, mu=rep(0,p), Sigma=Sigma)
-  selected <- graphSelect(data, penalty="lasso", lambda=NULL, data.splitting=F, penalize.diagonal = F)
-  j <- "all"
+  selected <- graphSelect(data, penalty="lasso", lambda=0.4, data.splitting=F, penalize.diagonal = F)
+  j <- 1
   selected$selected.edges
   # true.value <- Theta[selected$selected.indices[j,1],selected$selected.indices[j,2]]
   # if(true.value!=0) next
 
-  inference <- graphInference(data, selected, to.test="all", nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
-  W <- diag(inference$estimated.graph[inference$inference$row, inference$inference$col])
+  inference <- graphInference(data, selected, to.test=4, nullvalue=0, sandwich.variance=FALSE, alpha=0.05, seed=1)
+  W <- diag(inference$estimated.graph[inference$inference[,1], inference$inference[,2], drop=F])
   cbind(inference$inference, W)
 
   pval[jsim] <- inference[[1]]$p_value

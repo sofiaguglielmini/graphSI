@@ -10,25 +10,34 @@
 graphInference_polyhedral <- function(X, j, nullvalue, selected,
                                       sandwich.variance = FALSE,
                                       alpha = 0.05){
+  p <- ncol(X)
+  diags <- cumsum(p:1) - (p - 1:p)
   E <- selected$E
-  estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
-  conditional <- graph_polyhedral_conditioning(X = X, selected = selected, estimated = estimated)
-  if(is.character(j) && j == "all"){
-    p <- ncol(X)
-    diags <- cumsum(p:1) - (p - 1:p)
-    if(!selected$penalize.diagonal) E <- E[!E %in% diags]
-    j <- 1:length(E)
-    if(selected$penalize.diagonal) j <- j[!E[j] %in% diags]
-  }
+  indicesE <- cbind(1:length(E), E)
 
-  inference <- lapply(j, function(idx) {
-    inference_truncatedGaussian(conditional$theta_onestepE, idx, conditional$Sigma_E/nrow(X),
-                                nullvalue, conditional$A, conditional$b, alpha)
-  })
-  inference <- do.call(rbind, inference)
-  inference <- cbind(selected$selected.edges, inference)
-  return(list(inference = inference, estimated.graph = conditional$Theta_onestep))
+  estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
+
+  if(is.character(j) && j == "none"){
+    return(list(inference = NULL, estimated.graph = estimated$Theta_bar))
+  } else {
+    conditional <- graph_polyhedral_conditioning(X = X, selected = selected, estimated = estimated)
+
+    if(is.numeric(j)){
+      selectededges <- selected$selected.edges[j, , drop=F]
+    } else if(is.character(j) && j == "all"){
+      selectededges <- selected$selected.edges
+      j = 1:nrow(selectededges)
+    }
+
+    inference <- lapply(j, function(idx) {
+      inference_truncatedGaussian(conditional$theta_onestepE, idx, conditional$Sigma_E/nrow(X),
+                                  nullvalue, conditional$A, conditional$b, alpha)})
+    inference <- do.call(rbind, inference)
+    inference <- cbind(selectededges, inference)
+    return(list(inference = inference, estimated.graph = conditional$Theta_onestep))
+  }
 }
+
 
 #' @title Polyhedral conditioning for graphical models
 #' @description Compute the affine constraints and one-step estimator for polyhedral inference in graphical models.
