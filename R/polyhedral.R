@@ -9,12 +9,7 @@
 #' @return A list containing the p-value, lower and upper bounds of the confidence interval
 graphInference_polyhedral <- function(X, j, nullvalue, selected,
                                       sandwich.variance = FALSE,
-                                      alpha = 0.05){
-  p <- ncol(X)
-  diags <- cumsum(p:1) - (p - 1:p)
-  E <- selected$E
-  indicesE <- cbind(1:length(E), E)
-
+                                      alpha = 0.05){s
   estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
 
   if(is.character(j) && j == "none"){
