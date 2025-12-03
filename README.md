@@ -56,7 +56,7 @@ Fan, Jianqing, Yang Feng, and Yichao Wu. "Network exploration via the adaptive L
 
 Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. "Sparse inverse covariance estimation with the graphical lasso." _Biostatistics_ 9.3 (2008): 432-441.
 
-Guglielmini, Sofia, and Gerda Claeskens. "Asymptotic post-selection inference for regularized graphical models." _Statistics and Computing_ 35.2 (2025): 36.
+Guglielmini, Sofia, and Gerda Claeskens. "Asymptotic post-selection inference for regularized graphical models." _Statistics and Computing_ 35.2 (2025): 36.  https://doi.org/10.1007/s11222-025-10564-3
 
 Kovács, Solt, et al. "Graphical elastic net and target matrices: Fast algorithms and software for sparse precision matrix estimation." _arXiv preprint_ arXiv:2101.02148 (2021).
 
