@@ -10,11 +10,12 @@
 graphInference_polyhedral <- function(X, j, nullvalue, selected,
                                       sandwich.variance = FALSE,
                                       alpha = 0.05){
-  estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
 
   if(is.character(j) && j == "none"){
+    estimated <- graph_estimate(X = X, selected = selected, get_variance = FALSE)
     return(list(inference = NULL, estimated.graph = estimated$Theta_bar))
   } else {
+    estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
     conditional <- graph_polyhedral_conditioning(X = X, selected = selected, estimated = estimated)
 
     if(is.numeric(j)){
