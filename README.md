@@ -25,6 +25,7 @@ Returns a p-value and confidence interval for the chosen elements of the precisi
 ## Usage
 ```r
 library(MASS)
+library(graphSI)
 set.seed(1)
 n <- 100
 p <- 10
