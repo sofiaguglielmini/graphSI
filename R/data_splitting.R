@@ -13,11 +13,12 @@ graphInference_datasplitting <- function(X, j, nullvalue, selected,
   n2 <- nrow(X)
   E <- selected$E
   if(!selected$penalize.diagonal) E <- selected$Ep
-  estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
 
   if(is.character(j) && j == "none"){
+    estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance, get_variance = F)
     return(list(inference = NULL, estimated.graph = estimated$Theta_bar))
   } else{
+    estimated <- graph_estimate(X = X, selected = selected, sandwich.variance = sandwich.variance)
     if(is.character(j) && j == "all"){
       p <- ncol(X)
       diags <- cumsum(p:1) - (p - 1:p)
